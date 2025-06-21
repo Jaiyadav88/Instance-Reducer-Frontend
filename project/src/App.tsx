@@ -27,53 +27,51 @@ function App() {
   const [isLoadingPools, setIsLoadingPools] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Simulate API call to get applications
-  const fetchApplications = async () => {
+ const fetchApplications = async () => {
     if (!sealId.trim()) return;
-    
     setIsLoadingApplications(true);
     setApplications([]);
     setSelectedApplication(null);
     setPools([]);
     setSelectedPools(new Set());
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    
-    // Mock data
-    const mockApplications: Application[] = [
-      { id: '1', name: 'E-Commerce Platform', status: 'active', createdAt: '2024-01-15' },
-      { id: '2', name: 'Analytics Dashboard', status: 'active', createdAt: '2024-01-20' },
-      { id: '3', name: 'User Management System', status: 'pending', createdAt: '2024-01-25' },
-      { id: '4', name: 'Payment Gateway', status: 'inactive', createdAt: '2024-01-30' },
-    ];
-    
-    setApplications(mockApplications);
-    setIsLoadingApplications(false);
+
+    try {
+      const response = await fetch('http://localhost:8080/getapp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sealId }),
+      });
+      if (!response.ok) throw new Error('Failed to fetch applications');
+      const data: Application[] = await response.json();
+      setApplications(data);
+    } catch (error) {
+      console.error(error);
+      alert('Error fetching applications. Please try again.');
+    } finally {
+      setIsLoadingApplications(false);
+    }
   };
 
-  // Simulate API call to get pool details
+  // Fetch pool details for a given application
   const fetchPoolDetails = async (application: Application) => {
     setIsLoadingPools(true);
     setSelectedApplication(application);
     setPools([]);
     setSelectedPools(new Set());
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    // Mock data
-    const mockPools: Pool[] = [
-      { id: '1', name: 'Production Pool', type: 'automatic', status: 'running', size: '2.4 GB', lastModified: '2024-02-01 10:30' },
-      { id: '2', name: 'Staging Pool', type: 'manual', status: 'running', size: '1.8 GB', lastModified: '2024-02-01 09:15' },
-      { id: '3', name: 'Development Pool', type: 'manual', status: 'stopped', size: '950 MB', lastModified: '2024-01-31 16:45' },
-      { id: '4', name: 'Testing Pool', type: 'automatic', status: 'error', size: '1.2 GB', lastModified: '2024-01-31 14:20' },
-      { id: '5', name: 'Backup Pool', type: 'automatic', status: 'running', size: '3.1 GB', lastModified: '2024-02-01 08:00' },
-    ];
-    
-    setPools(mockPools);
-    setIsLoadingPools(false);
+
+    try {
+      const response = await fetch(`/api/applications/${application.id}/pools`);
+      if (!response.ok) throw new Error('Failed to fetch pools');
+      const data: Pool[] = await response.json();
+      setPools(data);
+    } catch (error) {
+      console.error(error);
+      alert('Error fetching pool details. Please try again.');
+    } finally {
+      setIsLoadingPools(false);
+    }
   };
+
 
   const togglePoolSelection = (poolId: string) => {
     const newSelection = new Set(selectedPools);

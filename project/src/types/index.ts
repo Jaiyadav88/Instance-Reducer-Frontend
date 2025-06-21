@@ -8,6 +8,8 @@ export interface Application {
   operationalstate: 'running' | 'stopped' | 'pending' | 'error';
   adminstate: 'enabled' | 'disabled' | 'maintenance';
   glb_routes: string[];
+  pool: string;
+  status: string;
 }
 
 export interface SealData {
